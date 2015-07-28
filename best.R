@@ -5,12 +5,12 @@ best <- function(state, outcome) {
         ## rate
         hospfile <- read.csv("outcome-of-care-measures.csv")
         ## Move data of interest into a frame
+        ## (This can not be the most elegant way of doing this...)
         washed_file <- data.frame("name" = hospfile[, 2],
-                                  "state" = hospfile[, 7],
-                                  "heart attack" = as.numeric(hospfile[, 11]),
-                                  "heart failure" = as.numeric(hospfile[, 17]),
-                                  "pneumonia" = as.numeric(hospfile[, 23]))
-        
+                           "state" = hospfile[, 7],
+                           "heart attack" = suppressWarnings(as.numeric(as.character(hospfile[, 11]))),
+                           "heart failure" = suppressWarnings(as.numeric(as.character(hospfile[, 17]))),
+                           "pneumonia" = suppressWarnings(as.numeric(as.character(hospfile[, 23]))))
         ## Let's only consider the rows that are in the relevant state
         all_in_state <- washed_file[which(washed_file[, 2] == state), ]
        
@@ -23,11 +23,11 @@ best <- function(state, outcome) {
         ## of deaths of category "outcome".
         ## If none of the predefined: stop with error message
         if (outcome == "heart attack") {
-                minimums <- all_in_state[, 3] == min(all_in_state[, 3])
+                minimums <- all_in_state[, 3] == min(all_in_state[, 3], na.rm = TRUE)
         } else if (outcome == "heart failure") {
-                minimums <- all_in_state[, 4] == min(all_in_state[, 4])
+                minimums <- all_in_state[, 4] == min(all_in_state[, 4], na.rm = TRUE)
         } else if (outcome == "pneumonia") {
-                minimums <- all_in_state[, 5] == min(all_in_state[, 5])
+                minimums <- all_in_state[, 5] == min(all_in_state[, 5], na.rm = TRUE)
         } else {
                 stop("Invalid outcome")
         }
