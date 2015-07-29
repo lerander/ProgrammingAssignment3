@@ -5,16 +5,17 @@ rankhospital <- function(state, outcome, num = "best") {
         
         hospfile <- read.csv("outcome-of-care-measures.csv", na.strings = "Not Available")
         
-        ## Map outcome to correct file column through outcome_vector.
-        ## If none of the predefined outcomes: the outcome was invalid.
-        if (outcome == "heart attack") outcome_vector <- hospfile[which(hospfile[, 7] == state), 11]
-        else if (outcome == "heart failure") outcome_vector <- hospfile[which(hospfile[, 7] == state), 17]
-        else if (outcome == "pneumonia") outcome_vector <- hospfile[which(hospfile[, 7] == state), 23]
+        ## Defining columns, and identifying illegal outcome input.
+        name_column <- 2
+        state_column <- 7
+        if (outcome == "heart attack")          outcome_column <- 11
+        else if (outcome == "heart failure")    outcome_column <- 17
+        else if (outcome == "pneumonia")        outcome_column <- 23
         else stop("Invalid outcome")
         
         ## Move data of interest into a frame
-        hospitals <- data.frame("name" = as.character(hospfile[which(hospfile[, 7] == state), 2]),
-                                "outcome percentage" = outcome_vector,
+        hospitals <- data.frame("name" = as.character(hospfile[which(hospfile[, state_column] == state), name_column]),
+                                "outcome percentage" = hospfile[which(hospfile[, state_column] == state), outcome_column],
                                 stringsAsFactors = FALSE)
         
         ## All states have hospitals. If no hospitals, the state was invalid.
