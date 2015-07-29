@@ -21,16 +21,16 @@ rankhospital <- function(state, outcome, num = "best") {
         ## All states have hospitals. If no hospitals, the state was invalid.
         if(nrow(hospitals) == 0) stop("Invalid state")
         
+        ## Handling of the special legal values for num
+        if(num == "worst") descend <- TRUE else descend <- FALSE
+        if(num == "worst" || num == "best") num <- 1
+        
         ## Sort the frame by 1. outcome percentage, 2. name. Remove NAs.
         sort_vector <- order(hospitals$outcome.percentage,
                              hospitals$name,
-                             na.last = NA)
-        
-        ## Handling of the special legal values for num
-        if(num == "best") index <- 1
-        else if(num == "worst") index <- length(sort_vector)
-        else index <- num
+                             na.last = NA,
+                             decreasing = descend)
         
         ## return name of the hospital with requested rank
-        hospitals$name[sort_vector[index]]
+        hospitals$name[sort_vector[num]]
 }
