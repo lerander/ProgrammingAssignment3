@@ -23,11 +23,7 @@ rankall <- function(outcome, num = "best") {
         
         completes <- hospitals[complete.cases(hospitals), ]
         
-        ## tapply(framen, faktorvektoren, funksjon som plukker ut verdi num og putter i en ny frame)
-        ## tapply(all_hospitals, state_vector, function(x))
-        ## Return the new frame
-        
-        ## Sort the frame by 1. outcome percentage, 2. name. Remove NAs.
+        ## when worst, we reverse ordering for outcome, but not for the others.
         if(num == "worst") {
                 sort_vector <- order(completes$state,
                                      - completes$outcome.percentage,
@@ -37,6 +33,7 @@ rankall <- function(outcome, num = "best") {
                                      completes$outcome.percentage,
                                      completes$name)
         }
+        
         if(num == "worst" || num == "best") num <- 1
         
         ## return name of the hospital with requested rank
@@ -44,40 +41,35 @@ rankall <- function(outcome, num = "best") {
                                         "name" = completes$name[sort_vector],
                                         "outcome" = completes$outcome.percentage[sort_vector])
         
-##        print(dim(ordered_completes))
-##        print(tail(ordered_completes, 30))
-        
         ## Now we have an ordered frame containing complete cases of state, name and outcome
         
-        ## One approach will be this:
+        ## Easy way to solve this, implemented below:
         ## Loop from 1 to length of the frame
         ## Look at the state. If it is "new", count (num - 1) from this. If state is still
         ## the same: store to result. (If not, store state and NA)
         state = "NN"
         name = "Initial"
-##        counter <- 0
+        ## Had some data.frame-problems. therefore populate a matrix
+        ## first, and present as data.frame afterwards. Should be fixed.
+        ## Also: predefining the size is obviously a hack.
         result <- matrix(nrow=54, ncol=2, byrow=TRUE, dimnames = list(NULL, c("hospital", "state")))
-##        print(class(result))
-##        print(dim(result))
-        ## names(result) <- c("hospital", "state")
+        
         counter <- 0
+        
+        # Should really find a more elegant way to do this!
         for(stateindex in (1:nrow(ordered_completes))) {
-                if (ordered_completes[stateindex, 1] != state) {
+                if (ordered_completes[stateindex, 1] != state) { #First row with a new state.
                         state <- ordered_completes[stateindex, 1]
                         counter <- counter + 1
-##                        print(paste("New state", state, as.character(counter)))
-                        if (ordered_completes[stateindex + num - 1, 1] == state &&
-                            stateindex + num - 1 <= nrow(ordered_completes)) {
-         ##                       print("state Was the same")
-                                result[counter, ] <- c(c(as.character(ordered_completes[stateindex + num - 1, 2]), as.character(state)))
+                        if (ordered_completes[stateindex + num - 1, 1] == state && ## offset with num-1, and check if same state
+                            stateindex + num - 1 <= nrow(ordered_completes)) { ## Don't move beyond last entry
+                                result[counter, ] <- c(c(as.character(ordered_completes[stateindex + num - 1, 2]),
+                                                         as.character(state)))
                         }
-                        else if (state != "NN") {
-         ##                       print("State was different")
+                        else if (state != "NN") { ## Push NA and state to result. (The dummy value should not be pushed.)
                                 result[counter, ] <- c(NA, c(as.character(state)))
                         }
                 }
         }
-        ##dim(result) <- c(55, 2)
         print(as.data.frame(result))
-
 }
